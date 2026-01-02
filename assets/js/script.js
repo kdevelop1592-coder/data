@@ -406,6 +406,15 @@ function displayResult(isCorrect, userAnswer, correctAnswer) {
     resultDiv.appendChild(resultIcon);
     resultDiv.appendChild(resultText);
     resultContainer.appendChild(resultDiv);
+    
+    // 해설 표시 추가
+    const currentQuestion = filteredQuestions[currentQuestionIndex];
+    if (currentQuestion && currentQuestion.explanation) {
+        const explanationDiv = document.createElement('div');
+        explanationDiv.className = 'explanation';
+        explanationDiv.innerHTML = `<h4> 해설</h4><p>${currentQuestion.explanation}</p>`;
+        resultContainer.appendChild(explanationDiv);
+    }
 
     isAnswerSubmitted = true;
     updateButtonStates();
