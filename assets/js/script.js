@@ -1,4 +1,6 @@
 import questions from './question.js';
+import { db, currentUser } from './auth.js';
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // DOM 요소 추가
 const selectionMessageContainer = document.getElementById('selection-message-container');
@@ -406,7 +408,7 @@ function displayResult(isCorrect, userAnswer, correctAnswer) {
     resultDiv.appendChild(resultIcon);
     resultDiv.appendChild(resultText);
     resultContainer.appendChild(resultDiv);
-    
+
     // 해설 표시 추가
     const currentQuestion = filteredQuestions[currentQuestionIndex];
     if (currentQuestion && currentQuestion.explanation) {
@@ -486,15 +488,34 @@ function showNextQuestion() {
 }
 
 // 마지막 문제 처리 함수
-function handleLastQuestion() {
+async function handleLastQuestion() {
     if (!questionContainer || !resultContainer) return;
 
     questionContainer.innerHTML = '';
     resultContainer.innerHTML = '';
 
+    const score = filteredQuestions.length - incorrectQuestions.length;
+
+    if (currentUser) {
+        try {
+            const userRef = doc(db, 'users', currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const currentData = userSnap.data();
+                if (score > (currentData.score || 0)) {
+                    await updateDoc(userRef, { score: score });
+                    const userInfoDisplay = document.getElementById('user-info');
+                    if (userInfoDisplay) userInfoDisplay.textContent = `${currentData.name}님 환영합니다! (최고점: ${score})`;
+                }
+            }
+        } catch (e) {
+            console.error('Error updating score:', e);
+        }
+    }
+
     const completionMessage = document.createElement('div');
     completionMessage.className = 'message success';
-    completionMessage.innerHTML = `<h2>모든 문제를 완료했습니다!</h2><p>총 ${filteredQuestions.length}개의 문제 중 ${filteredQuestions.length - incorrectQuestions.length}개를 맞추셨습니다.</p>`;
+    completionMessage.innerHTML = `<h2>모든 문제를 완료했습니다!</h2><p>총 ${filteredQuestions.length}개의 문제 중 ${score}개를 맞추셨습니다.</p>`;
 
     questionContainer.appendChild(completionMessage);
 

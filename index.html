@@ -11,6 +11,11 @@
 <body>
     <header>
         <h1>데이터</h1>
+        <div class="auth-container">
+            <span id="user-info" style="display: none; margin-right: 15px; font-weight: bold;"></span>
+            <button id="login-btn" class="auth-button">Google 로그인</button>
+            <button id="logout-btn" class="auth-button" style="display: none;">로그아웃</button>
+        </div>
     </header>
 
     <main>
@@ -59,6 +64,30 @@
         <p>&copy; 2025 컴119. All rights reserved.</p>
     </footer>
 
+    <!-- 개인정보 수집 및 이용 동의 모달 -->
+    <div id="policy-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>개인정보 수집 및 이용 동의</h2>
+            <div class="policy-text">
+                <p>서비스 이용을 위해 아래 목적에 동의해주세요.</p>
+                <ul>
+                    <li><strong>수집 목적:</strong> 서비스 이용 기록 관리 및 성적 확인</li>
+                    <li><strong>수집 항목:</strong> 이름, 아이디 (이메일), 퀴즈 점수</li>
+                    <li><strong>보유 기간:</strong> 회원 탈퇴 시까지</li>
+                </ul>
+            </div>
+            <div class="policy-agree">
+                <input type="checkbox" id="policy-consent">
+                <label for="policy-consent">위 내용을 확인하였으며 동의합니다.</label>
+            </div>
+            <div class="modal-buttons">
+                <button id="policy-cancel-btn" class="cancel-btn">취소</button>
+                <button id="policy-agree-btn" class="agree-btn">동의 및 가입</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="assets/js/auth.js"></script>
     <script type="module" src="assets/js/script.js"></script>
 </body>
 

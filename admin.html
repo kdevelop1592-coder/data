@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - 데이터</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .user-table th {
+            background-color: #f4f4f4;
+            white-space: nowrap;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-blocked {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-deleted {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            margin-right: 5px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .block-btn {
+            background-color: #ff9800;
+        }
+
+        .block-btn.unblock {
+            background-color: #4CAF50;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>관리자 전용 대시보드</h1>
+        <div class="auth-container">
+            <span id="user-info" style="display: none; margin-right: 15px; font-weight: bold;"></span>
+            <button id="login-btn" class="auth-button">Google 로그인</button>
+            <button id="logout-btn" class="auth-button" style="display: none;">로그아웃</button>
+        </div>
+        <div style="margin-top: 15px;">
+            <a href="index.html" style="color: white; text-decoration: underline;">메인으로 돌아가기</a>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div id="access-denied" style="text-align: center; color: red;">
+            <h2>접근 권한 확인 중...</h2>
+            <p>관리자 계정으로 로그인해주세요.</p>
+        </div>
+
+        <div id="admin-content" style="display: none;">
+            <h2>가입자 목록 및 성적 관리</h2>
+            <p style="margin-bottom:10px;">회원의 점수를 확인하고, 차단 및 강제 퇴장(데이터 삭제) 처리를 할 수 있습니다.</p>
+            <div style="overflow-x: auto;">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>아이디 (이메일)</th>
+                            <th>가입일</th>
+                            <th>최고 점수</th>
+                            <th>상태</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list">
+                        <!-- 유저 데이터 렌더링 영역 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="assets/js/admin.js"></script>
+</body>
+
+</html>
