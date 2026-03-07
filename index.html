@@ -31,6 +31,18 @@
 
 
             <div class="filter-group">
+                <label for="selection-chapter-filter">출제 단원:</label>
+                <select id="selection-chapter-filter">
+                    <option value="전체">전체 단원</option>
+                    <option value="1. 컴퓨팅 시스템">1단원 컴퓨팅 시스템</option>
+                    <option value="2. 데이터">2단원 데이터</option>
+                    <option value="3. 알고리즘과 프로그래밍">3단원 알고리즘과 프로그래밍</option>
+                    <option value="4. 인공지능">4단원 인공지능</option>
+                    <option value="5. 디지털 문화">5단원 디지털 문화</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
                 <label for="selection-type-filter">문제 유형:</label>
                 <select id="selection-type-filter">
                     <option value="선택하세요">선택하세요</option>
@@ -61,6 +73,7 @@
                 <button id="show-answer-button">정답 보기</button>
                 <button id="next-button">다음</button>
                 <button id="reset-button">범위 재선택</button>
+                <button id="save-and-quit-btn" style="background-color: #f39c12; margin-left: auto;">저장 후 중단</button>
             </div>
         </div>
     </main>
@@ -68,6 +81,21 @@
     <footer>
         <p>&copy; 2026 코드깎는 Kd. All rights reserved.</p>
     </footer>
+
+    <!-- 이어풀기 확인 모달 -->
+    <div id="resume-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>진행 중인 학습</h2>
+            <div class="policy-text">
+                <p>마지막으로 중단한 학습 지점이 있습니다.</p>
+                <p>이어서 학습하시겠습니까?</p>
+            </div>
+            <div class="modal-buttons">
+                <button id="resume-cancel-btn" class="cancel-btn">무시하고 처음부터</button>
+                <button id="resume-agree-btn" class="agree-btn">이어서 풀기</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 미가입자 로그인 시도 안내 모달 -->
     <div id="no-account-modal" class="modal-overlay" style="display: none;">
@@ -108,14 +136,29 @@
         </div>
     </div>
 
-    <!-- 2차 비밀번호 입력 모달 -->
+    <!-- 2차 비밀번호 및 회원정보 입력 모달 -->
     <div id="password-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content glass-panel">
-            <h2 id="password-modal-title">2차 비밀번호 입력</h2>
+        <div class="modal-content glass-panel" style="max-width: 450px;">
+            <h2 id="password-modal-title">회원 정보 및 비밀번호 설정</h2>
             <div class="policy-text">
-                <p id="password-modal-desc">서비스 이용을 위해 설정하신 2차 비밀번호를 입력해주세요.</p>
+                <p id="password-modal-desc">서비스 이용을 위해 학생 정보와 보호용 2차 비밀번호를 입력해주세요.</p>
+
+                <!-- 신규 가입자 전용 학적 정보 입력 (기존 유저 로그인 시 JS로 숨김 처리) -->
+                <div id="user-info-fields" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="student-grade" class="blank-input" placeholder="학년" min="1" max="3"
+                            style="width: 30%; border-radius: 4px; padding: 8px; border: 1px solid #ddd; background: rgba(255, 255, 255, 0.9);">
+                        <input type="number" id="student-class" class="blank-input" placeholder="반" min="1" max="20"
+                            style="width: 30%; border-radius: 4px; padding: 8px; border: 1px solid #ddd; background: rgba(255, 255, 255, 0.9);">
+                        <input type="number" id="student-number" class="blank-input" placeholder="번호" min="1" max="50"
+                            style="width: 30%; border-radius: 4px; padding: 8px; border: 1px solid #ddd; background: rgba(255, 255, 255, 0.9);">
+                    </div>
+                    <input type="text" id="student-name" class="blank-input" placeholder="이름 (실명)"
+                        style="width: 100%; border-radius: 4px; padding: 10px; border: 1px solid #ddd; background: rgba(255, 255, 255, 0.9);">
+                </div>
+
                 <div style="margin-top: 15px;">
-                    <input type="password" id="secondary-password-input" class="blank-input" placeholder="비밀번호"
+                    <input type="password" id="secondary-password-input" class="blank-input" placeholder="2차 비밀번호"
                         style="width: 100%; border-radius: 4px; padding: 10px; border: 1px solid #ddd; background: rgba(255, 255, 255, 0.9);">
                 </div>
             </div>

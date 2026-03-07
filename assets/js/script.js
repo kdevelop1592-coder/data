@@ -16,6 +16,11 @@ const selectionContainer = document.getElementById('selection-container');
 const startButton = document.getElementById('start-button');
 const quizContainer = document.getElementById('quiz-container');
 const resetButton = document.getElementById('reset-button');
+const saveAndQuitBtn = document.getElementById('save-and-quit-btn');
+
+const resumeModal = document.getElementById('resume-modal');
+const resumeCancelBtn = document.getElementById('resume-cancel-btn');
+const resumeAgreeBtn = document.getElementById('resume-agree-btn');
 
 // 상태 변수
 let currentQuestionIndex = 0;
@@ -28,6 +33,7 @@ let isMultipleChoiceAnswered = false;
 let isEssayAnswerShown = false;
 
 document.addEventListener('DOMContentLoaded', function () {
+    const selectionChapterFilter = document.getElementById('selection-chapter-filter');
     const selectionTypeFilter = document.getElementById('selection-type-filter');
 
     // 필수 DOM 요소 체크
@@ -49,6 +55,31 @@ document.addEventListener('DOMContentLoaded', function () {
     if (prevButton) prevButton.addEventListener('click', showPreviousQuestion);
     if (nextButton) nextButton.addEventListener('click', showNextQuestion);
     if (resetButton) resetButton.addEventListener('click', resetQuiz);
+    if (saveAndQuitBtn) saveAndQuitBtn.addEventListener('click', saveAndQuitQuiz);
+
+    // 이어풀기 모달 이벤트
+    if (resumeCancelBtn) {
+        resumeCancelBtn.addEventListener('click', async () => {
+            if (resumeModal) resumeModal.style.display = 'none';
+            // 기존 세션 DB에서 삭제
+            if (currentUser) {
+                try {
+                    const userRef = doc(db, 'users', currentUser.uid);
+                    await updateDoc(userRef, { currentSession: null });
+                } catch (e) {
+                    console.error("Failed to delete session", e);
+                }
+            }
+            startQuiz(null, document.getElementById('selection-type-filter').value);
+        });
+    }
+
+    if (resumeAgreeBtn) {
+        resumeAgreeBtn.addEventListener('click', () => {
+            if (resumeModal) resumeModal.style.display = 'none';
+            resumeQuizFromSession();
+        });
+    }
 
     // 키보드 이벤트 리스너 추가 - 엔터키 처리
     document.addEventListener('keydown', function (event) {
@@ -103,12 +134,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // 시작 버튼 이벤트 리스너 추가
-    startButton.addEventListener('click', () => {
+    startButton.addEventListener('click', async () => {
         if (!currentUser) {
             showMessage('Google 로그인을 먼저 진행해주세요.', 'warning');
             return;
         }
 
+        const selectedChapter = selectionChapterFilter ? selectionChapterFilter.value : '전체';
         const selectedType = selectionTypeFilter.value;
 
         if (selectedType === '선택하세요') {
@@ -116,24 +148,54 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        startQuiz(null, selectedType);
+        // DB에 저장된 이어풀기 세션이 있는지 확인
+        try {
+            const userRef = doc(db, 'users', currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                if (userData.currentSession && userData.currentSession.filteredQuestions && userData.currentSession.filteredQuestions.length > 0) {
+                    // 이어풀기 모달 표시
+                    window.pendingQuizSession = userData.currentSession;
+                    if (resumeModal) resumeModal.style.display = 'flex';
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('Error checking session:', e);
+        }
+
+        startQuiz(selectedChapter, selectedType);
     });
 
     // 필터 변경 이벤트 리스너
-    selectionTypeFilter.addEventListener('change', () => {
-        updateMessageForSelection(selectionTypeFilter.value);
-    });
+    if (selectionChapterFilter) {
+        selectionChapterFilter.addEventListener('change', () => {
+            updateMessageForSelection(selectionChapterFilter.value, selectionTypeFilter.value);
+        });
+    }
+    if (selectionTypeFilter) {
+        selectionTypeFilter.addEventListener('change', () => {
+            const chapterVal = selectionChapterFilter ? selectionChapterFilter.value : '전체';
+            updateMessageForSelection(chapterVal, selectionTypeFilter.value);
+        });
+    }
 
     // 초기 메시지 표시
-    updateMessageForSelection(selectionTypeFilter.value);
+    const initialChapter = selectionChapterFilter ? selectionChapterFilter.value : '전체';
+    updateMessageForSelection(initialChapter, selectionTypeFilter ? selectionTypeFilter.value : '선택하세요');
 });
 
 // 선택에 따른 메시지 업데이트 함수
-function updateMessageForSelection(selectedType) {
+function updateMessageForSelection(selectedChapter, selectedType) {
     if (selectedType === '선택하세요') {
         showMessage('문제 유형을 선택해주세요.', 'info');
     } else {
-        const filtered = questions.filter(q => q.type === selectedType);
+        let filtered = [...questions];
+        if (selectedChapter && selectedChapter !== '전체') {
+            filtered = filtered.filter(q => q.chapter === selectedChapter || q.chapter.includes(selectedChapter.split('.')[1].trim()));
+        }
+        filtered = filtered.filter(q => q.type === selectedType);
         showMessage(`선택된 조건에 맞는 문제: ${filtered.length}개`, 'info');
     }
 }
@@ -149,9 +211,11 @@ function filterQuestions(selectedChapter, selectedType) {
     // 모든 문제를 가져옴
     let filtered = [...questions];
 
-    // 챕터 필터링 (selectedChapter가 null이면 모든 챕터 포함)
-    if (selectedChapter) {
-        filtered = filtered.filter(q => q.chapter === selectedChapter);
+    // 챕터 필터링 (selectedChapter가 '전체'가 아니면 필터링)
+    if (selectedChapter && selectedChapter !== '전체') {
+        // q.chapter가 '데이터' 와 같이 저장되어 있을 수 있으므로 포함 여부 검사
+        const chapterName = selectedChapter.split('.')[1] ? selectedChapter.split('.')[1].trim() : selectedChapter;
+        filtered = filtered.filter(q => q.chapter === selectedChapter || q.chapter.includes(chapterName));
     }
 
     // 유형 필터링
@@ -175,7 +239,7 @@ function filterQuestions(selectedChapter, selectedType) {
     return true;
 }
 
-// startQuiz 함수 수정
+// startQuiz 함수 (새로 시작)
 function startQuiz(chapter, type) {
     // 필터링 실행
     if (!filterQuestions(chapter, type)) {
@@ -185,7 +249,8 @@ function startQuiz(chapter, type) {
     // 퀴즈 시작 상태로 변경
     quizStarted = true;
 
-    // 선택 화면 숨기고 퀴즈 화면 표시
+    // 모달/선택 화면 숨기고 퀴즈 화면 표시
+    if (resumeModal) resumeModal.style.display = 'none';
     if (selectionContainer) selectionContainer.style.display = 'none';
     if (quizContainer) quizContainer.style.display = 'block';
 
@@ -193,6 +258,63 @@ function startQuiz(chapter, type) {
     currentQuestionIndex = 0;
     updateQuestionCounter();
     displayQuestion();
+}
+
+// 저장된 세션에서 이어서 시작하는 함수
+function resumeQuizFromSession() {
+    if (!window.pendingQuizSession) return;
+
+    const session = window.pendingQuizSession;
+    filteredQuestions = session.filteredQuestions || [];
+    currentQuestionIndex = session.currentQuestionIndex || 0;
+    incorrectQuestions = session.incorrectQuestions || [];
+    isReviewMode = session.isReviewMode || false;
+    isAnswerSubmitted = session.isAnswerSubmitted || false;
+    isMultipleChoiceAnswered = session.isMultipleChoiceAnswered || false;
+    isEssayAnswerShown = session.isEssayAnswerShown || false;
+
+    quizStarted = true;
+    window.pendingQuizSession = null;
+
+    if (resumeModal) resumeModal.style.display = 'none';
+    if (selectionContainer) selectionContainer.style.display = 'none';
+    if (quizContainer) quizContainer.style.display = 'block';
+
+    updateQuestionCounter();
+    displayQuestion();
+}
+
+// 저장 후 중단하기 버튼 핸들러
+async function saveAndQuitQuiz() {
+    if (!currentUser || !quizStarted) return;
+
+    // 마지막 문제일 경우(완료된 경우)는 저장 대신 resetQuiz 실행
+    if (currentQuestionIndex >= filteredQuestions.length - 1 && isAnswerSubmitted) {
+        resetQuiz();
+        return;
+    }
+
+    try {
+        const sessionData = {
+            filteredQuestions,
+            currentQuestionIndex,
+            incorrectQuestions,
+            isReviewMode,
+            isAnswerSubmitted,
+            isMultipleChoiceAnswered,
+            isEssayAnswerShown,
+            timestamp: new Date()
+        };
+
+        const userRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(userRef, { currentSession: sessionData });
+
+        alert('진도가 안전하게 저장되었습니다. 퀴즈를 중단합니다.');
+        resetQuiz(true); // true = 내부적으로 DB 세션 삭제하지 않음
+    } catch (error) {
+        console.error('Error saving session:', error);
+        alert('저장에 실패했습니다. 인터넷 연결을 확인해주세요.');
+    }
 }
 
 // 문제 표시
@@ -547,6 +669,17 @@ async function handleLastQuestion() {
     if (submitButton) submitButton.style.display = 'none';
     if (showAnswerButton) showAnswerButton.style.display = 'none';
     if (nextButton) nextButton.style.display = 'none';
+    if (saveAndQuitBtn) saveAndQuitBtn.style.display = 'none';
+
+    // 끝까지 완료했으므로 DB에서 세션 삭제
+    if (currentUser) {
+        try {
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, { currentSession: null });
+        } catch (e) {
+            console.error("Failed to delete session on complete", e);
+        }
+    }
 }
 
 // 오답 복습 모드 시작 함수
@@ -620,8 +753,23 @@ function showMessage(text, type = 'info') {
     }
 }
 
-// 퀴즈 초기화 함수
-function resetQuiz() {
+// 퀴즈 초기화 함수 (skipSessionDelete가 true면 DB 세션을 지우지 않음)
+async function resetQuiz(skipSessionDelete = false) {
+    // 버튼 이벤트 직접 호출 시 객체 이벤트 넘어오는 것 방지
+    if (typeof skipSessionDelete !== 'boolean') {
+        skipSessionDelete = false;
+    }
+
+    // 완전 초기화 시 DB 세션도 삭제 (명시적 중단인 경우 제외)
+    if (!skipSessionDelete && currentUser && quizStarted) {
+        try {
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, { currentSession: null });
+        } catch (e) {
+            console.error("Failed to delete session on reset", e);
+        }
+    }
+
     // 상태 초기화
     currentQuestionIndex = 0;
     filteredQuestions = [];
@@ -641,14 +789,19 @@ function resetQuiz() {
     if (submitButton) submitButton.style.display = 'inline-block';
     if (showAnswerButton) showAnswerButton.style.display = 'inline-block';
     if (nextButton) nextButton.style.display = 'inline-block';
+    if (saveAndQuitBtn) saveAndQuitBtn.style.display = 'inline-block';
 
     // 선택 화면으로 돌아가기
     showSelectionScreen();
 
     // 필터 초기화
+    const selectionChapterFilter = document.getElementById('selection-chapter-filter');
     const selectionTypeFilter = document.getElementById('selection-type-filter');
+    if (selectionChapterFilter) {
+        selectionChapterFilter.value = '전체';
+    }
     if (selectionTypeFilter) {
         selectionTypeFilter.value = '선택하세요';
-        updateMessageForSelection('선택하세요');
+        updateMessageForSelection(selectionChapterFilter ? selectionChapterFilter.value : '전체', '선택하세요');
     }
 }

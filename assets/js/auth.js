@@ -93,6 +93,10 @@ async function initiateAuthFlow(user, flowType = 'auto') {
             passwordModal.style.display = 'flex';
             if (passwordInput) passwordInput.value = '';
 
+            // 기존 가입자이므로 학적 정보 필드는 숨김
+            const userInfoFields = document.getElementById('user-info-fields');
+            if (userInfoFields) userInfoFields.style.display = 'none';
+
             // 기존 가입자인데 비밀번호 필드가 없는 경우 (초기 모델 유저)
             if (!userData.password) {
                 isNewUserFlow = true; // 비밀번호 설정을 위해 flow 전환
@@ -160,6 +164,7 @@ if (logoutBtn) {
     });
 }
 
+// 약관 동의 모달: 동의 및 가입
 if (policyAgreeBtn) {
     policyAgreeBtn.addEventListener('click', async () => {
         if (!pendingCreds) return;
@@ -176,7 +181,18 @@ if (policyAgreeBtn) {
         if (passwordModal) {
             passwordModal.style.display = 'flex';
             if (passwordInput) passwordInput.value = '';
-            if (passwordModalDesc) passwordModalDesc.textContent = '사용하실 2차 비밀번호를 설정해주세요.';
+
+            // 신규 가입자이므로 학적 정보 필드 표시
+            const userInfoFields = document.getElementById('user-info-fields');
+            if (userInfoFields) {
+                userInfoFields.style.display = 'flex';
+                // 필드 초기화
+                document.getElementById('student-grade').value = '';
+                document.getElementById('student-class').value = '';
+                document.getElementById('student-number').value = '';
+                document.getElementById('student-name').value = '';
+            }
+            if (passwordModalDesc) passwordModalDesc.textContent = '서비스 이용을 위해 학적 정보와 2차 비밀번호를 입력해주세요.';
         }
     });
 }
@@ -223,6 +239,19 @@ if (passwordSubmitBtn) {
             try {
                 const isLegacyUserUpdate = pendingUserData && !pendingUserData.password;
 
+                let sGrade = '', sClass = '', sNum = '', sName = '';
+                if (!isLegacyUserUpdate) {
+                    sGrade = document.getElementById('student-grade').value;
+                    sClass = document.getElementById('student-class').value;
+                    sNum = document.getElementById('student-number').value;
+                    sName = document.getElementById('student-name').value;
+
+                    if (!sGrade || !sClass || !sNum || !sName) {
+                        alert('학적 정보(학년/반/번호/이름)를 모두 입력해주세요.');
+                        return;
+                    }
+                }
+
                 let newUser = null;
                 if (isLegacyUserUpdate) {
                     // 기존 유저 비밀번호 추가 업데이트 (setDoc merge)
@@ -233,7 +262,10 @@ if (passwordSubmitBtn) {
                     newUser = {
                         uid: pendingCreds.uid,
                         email: pendingCreds.email,
-                        name: pendingCreds.displayName,
+                        name: sName || pendingCreds.displayName, // 입력 실명 사용
+                        grade: parseInt(sGrade),
+                        classNum: parseInt(sClass),
+                        studentNum: parseInt(sNum),
                         score: 0,
                         status: 'active',
                         password: pwd,
