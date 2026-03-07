@@ -112,6 +112,20 @@
 
     <script type="module" src="assets/js/auth.js"></script>
     <script type="module" src="assets/js/script.js"></script>
+    <script>
+        // 마우스 포인터를 따라 배경 조명 효과
+        let rafId = null;
+        document.addEventListener('mousemove', (e) => {
+            if (rafId) return;
+            rafId = requestAnimationFrame(() => {
+                const x = (e.clientX / window.innerWidth * 100).toFixed(2) + '%';
+                const y = (e.clientY / window.innerHeight * 100).toFixed(2) + '%';
+                document.body.style.setProperty('--mx', x);
+                document.body.style.setProperty('--my', y);
+                rafId = null;
+            });
+        });
+    </script>
 </body>
 
 </html>
