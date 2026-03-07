@@ -31,6 +31,10 @@ const policyModal = document.getElementById('policy-modal');
 const policyAgreeBtn = document.getElementById('policy-agree-btn');
 const policyCancelBtn = document.getElementById('policy-cancel-btn');
 
+const noAccountModal = document.getElementById('no-account-modal');
+const noAccountCancelBtn = document.getElementById('no-account-cancel-btn');
+const noAccountSignupBtn = document.getElementById('no-account-signup-btn');
+
 const passwordModal = document.getElementById('password-modal');
 const passwordInput = document.getElementById('secondary-password-input');
 const passwordSubmitBtn = document.getElementById('password-submit-btn');
@@ -99,12 +103,15 @@ async function initiateAuthFlow(user, flowType = 'auto') {
         }
     } else {
         if (flowType === 'login') {
-            alert('가입된 정보가 없습니다. 회원가입을 먼저 진행해주세요.');
-            await signOut(auth);
+            // alert 대신 전용 안내 모달 표시 (signOut은 모달 닫을 때 처리)
+            pendingCreds = user;
+            if (noAccountModal) {
+                noAccountModal.style.display = 'flex';
+            }
             return;
         }
 
-        // Show policy modal for new users
+        // Show policy modal for new users (signup 또는 auto flow)
         pendingCreds = user;
         if (policyModal) {
             policyModal.style.display = 'flex';
@@ -179,6 +186,27 @@ if (policyCancelBtn) {
         policyModal.style.display = 'none';
         pendingCreds = null;
         await signOut(auth);
+    });
+}
+
+// 미가입 안내 모달: 닫기
+if (noAccountCancelBtn) {
+    noAccountCancelBtn.addEventListener('click', async () => {
+        noAccountModal.style.display = 'none';
+        pendingCreds = null;
+        await signOut(auth);
+    });
+}
+
+// 미가입 안내 모달: 회원가입 하러 가기
+if (noAccountSignupBtn) {
+    noAccountSignupBtn.addEventListener('click', async () => {
+        noAccountModal.style.display = 'none';
+        // 이미 pendingCreds(로그인된 Firebase 유저)가 있으므로
+        // signOut 없이 바로 약관 동의 모달로 이동
+        if (pendingCreds && policyModal) {
+            policyModal.style.display = 'flex';
+        }
     });
 }
 

@@ -69,7 +69,23 @@
         <p>&copy; 2026 코드깎는 Kd. All rights reserved.</p>
     </footer>
 
+    <!-- 미가입자 로그인 시도 안내 모달 -->
+    <div id="no-account-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>⚠️ 가입된 정보 없음</h2>
+            <div class="policy-text">
+                <p>로그인하신 Google 계정으로 가입된 정보가 없습니다.</p>
+                <p style="margin-top: 8px;">회원가입을 먼저 진행해주세요.</p>
+            </div>
+            <div class="modal-buttons">
+                <button id="no-account-cancel-btn" class="cancel-btn">닫기</button>
+                <button id="no-account-signup-btn" class="agree-btn">회원가입 하러 가기</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 개인정보 수집 및 이용 동의 모달 -->
+
     <div id="policy-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2>개인정보 수집 및 이용 동의</h2>
