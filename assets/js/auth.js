@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBTVAcIW4-lZnXn5_ilHJobuIgi6zPaT3g",
@@ -17,11 +17,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
+// 공용 컴퓨터 환경: 항상 구글 계정 선택 화면 강제 표시
+provider.setCustomParameters({ prompt: 'select_account' });
 
 let currentUser = null;
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
+const signupBtn = document.getElementById('signup-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const userInfoDisplay = document.getElementById('user-info');
 const policyModal = document.getElementById('policy-modal');
@@ -42,6 +45,7 @@ let isSecondAuthPassed = false;
 function updateUI(user, dbUser) {
     if (user && dbUser && isSecondAuthPassed) {
         if (loginBtn) loginBtn.style.display = 'none';
+        if (signupBtn) signupBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'inline-block';
         if (userInfoDisplay) {
             userInfoDisplay.textContent = `${dbUser.name}님 환영합니다! (최고점: ${dbUser.score || 0})`;
@@ -52,17 +56,25 @@ function updateUI(user, dbUser) {
         }
     } else {
         if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (signupBtn) signupBtn.style.display = 'inline-block';
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (userInfoDisplay) userInfoDisplay.style.display = 'none';
         if (adminBtn) adminBtn.style.display = 'none';
     }
 }
 
-async function initiateAuthFlow(user) {
+// flowType: 'login' | 'signup' | 'auto'
+async function initiateAuthFlow(user, flowType = 'auto') {
     const userRef = doc(db, 'users', user.uid);
     const docSnap = await getDoc(userRef);
 
     if (docSnap.exists()) {
+        if (flowType === 'signup') {
+            alert('이미 가입된 계정입니다. 로그인을 이용해주세요.');
+            await signOut(auth);
+            return;
+        }
+
         const userData = docSnap.data();
         if (userData.status === 'blocked' || userData.status === 'deleted') {
             alert('이용이 정지되거나 퇴장당한 계정입니다.');
@@ -76,9 +88,22 @@ async function initiateAuthFlow(user) {
         if (passwordModal) {
             passwordModal.style.display = 'flex';
             if (passwordInput) passwordInput.value = '';
-            if (passwordModalDesc) passwordModalDesc.textContent = '서비스 이용을 위해 설정하신 2차 비밀번호를 입력해주세요.';
+
+            // 기존 가입자인데 비밀번호 필드가 없는 경우 (초기 모델 유저)
+            if (!userData.password) {
+                isNewUserFlow = true; // 비밀번호 설정을 위해 flow 전환
+                if (passwordModalDesc) passwordModalDesc.textContent = '초기 가입자입니다. 사용하실 2차 비밀번호를 새로 설정해주세요.';
+            } else {
+                if (passwordModalDesc) passwordModalDesc.textContent = '서비스 이용을 위해 설정하신 2차 비밀번호를 입력해주세요.';
+            }
         }
     } else {
+        if (flowType === 'login') {
+            alert('가입된 정보가 없습니다. 회원가입을 먼저 진행해주세요.');
+            await signOut(auth);
+            return;
+        }
+
         // Show policy modal for new users
         pendingCreds = user;
         if (policyModal) {
@@ -87,14 +112,27 @@ async function initiateAuthFlow(user) {
     }
 }
 
+// 회원가입 전용 버튼 이벤트
+if (signupBtn) {
+    signupBtn.addEventListener('click', async () => {
+        try {
+            const result = await signInWithPopup(auth, provider);
+            if (!isSecondAuthPassed) {
+                await initiateAuthFlow(result.user, 'signup');
+            }
+        } catch (error) {
+            console.error("Signup failed", error);
+            alert("회원가입 중 오류가 발생했습니다.");
+        }
+    });
+}
+
 if (loginBtn) {
     loginBtn.addEventListener('click', async () => {
         try {
             const result = await signInWithPopup(auth, provider);
-            // initiateAuthFlow는 onAuthStateChanged에서 처리되므로 여기선 팝업만 실행해도 됨.
-            // 단, 이미 로그인된 상태에서 버튼을 강제로 누른 경우는 명시적 호출
             if (!isSecondAuthPassed) {
-                await initiateAuthFlow(result.user);
+                await initiateAuthFlow(result.user, 'login');
             }
         } catch (error) {
             console.error("Login failed", error);
@@ -106,7 +144,12 @@ if (loginBtn) {
 if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
         isSecondAuthPassed = false;
+        currentUser = null;
+        pendingCreds = null;
+        pendingUserData = null;
         await signOut(auth);
+        // 세션 완전 초기화를 위해 페이지 새로고침
+        window.location.reload();
     });
 }
 
@@ -150,17 +193,27 @@ if (passwordSubmitBtn) {
         if (isNewUserFlow) {
             // 신규 가입 저장 처리
             try {
-                const newUser = {
-                    uid: pendingCreds.uid,
-                    email: pendingCreds.email,
-                    name: pendingCreds.displayName,
-                    score: 0,
-                    status: 'active',
-                    password: pwd, // 실 서비스에선 해싱 필요
-                    createdAt: new Date()
-                };
+                const isLegacyUserUpdate = pendingUserData && !pendingUserData.password;
 
-                await setDoc(doc(db, 'users', pendingCreds.uid), newUser);
+                let newUser = null;
+                if (isLegacyUserUpdate) {
+                    // 기존 유저 비밀번호 추가 업데이트 (setDoc merge)
+                    newUser = { ...pendingUserData, password: pwd };
+                    await updateDoc(doc(db, 'users', pendingCreds.uid), { password: pwd });
+                } else {
+                    // 완전 신규 유저 생성
+                    newUser = {
+                        uid: pendingCreds.uid,
+                        email: pendingCreds.email,
+                        name: pendingCreds.displayName,
+                        score: 0,
+                        status: 'active',
+                        password: pwd,
+                        createdAt: new Date()
+                    };
+                    await setDoc(doc(db, 'users', pendingCreds.uid), newUser);
+                }
+
                 passwordModal.style.display = 'none';
                 isSecondAuthPassed = true;
                 currentUser = { ...pendingCreds, dbData: newUser };

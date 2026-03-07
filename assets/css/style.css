@@ -627,3 +627,23 @@ footer {
     padding: 10px 20px;
     font-size: 1rem;
 }
+
+/* 신규 추가: 로그인 및 회원가입 나눔 색상 */
+.signup-color {
+    background-color: #4CAF50;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+.signup-color:hover {
+    background-color: #388E3C;
+}
+
+.login-color {
+    background-color: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+}
+
+.login-color:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

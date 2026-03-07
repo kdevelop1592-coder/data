@@ -97,7 +97,7 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         if (accessDeniedDiv) {
             accessDeniedDiv.style.display = 'block';
-            accessDeniedDiv.innerHTML = '<h2>접근 권한이 없습니다.</h2><p>관리자 계정으로 로그인해주세요.</p>';
+            accessDeniedDiv.innerHTML = '<h2>접근 권한이 없습니다.</h2><p>메인 화면에서 관리자 계정으로 로그인 후 다시 접속해주세요.</p>';
         }
         if (adminContentDiv) adminContentDiv.style.display = 'none';
     }
