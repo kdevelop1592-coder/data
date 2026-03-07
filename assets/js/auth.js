@@ -28,24 +28,37 @@ const policyModal = document.getElementById('policy-modal');
 const policyAgreeBtn = document.getElementById('policy-agree-btn');
 const policyCancelBtn = document.getElementById('policy-cancel-btn');
 
-let pendingCreds = null; // To hold user info temporarily before policy agreement
+const passwordModal = document.getElementById('password-modal');
+const passwordInput = document.getElementById('secondary-password-input');
+const passwordSubmitBtn = document.getElementById('password-submit-btn');
+const passwordCancelBtn = document.getElementById('password-cancel-btn');
+const passwordModalDesc = document.getElementById('password-modal-desc');
+const adminBtn = document.getElementById('admin-btn');
 
+let pendingCreds = null; // To hold user info temporarily before policy agreement
+let pendingUserData = null; // For existing users
+let isNewUserFlow = false; // Flag to check if setting new password or verifying
+let isSecondAuthPassed = false;
 function updateUI(user, dbUser) {
-    if (user && dbUser) {
+    if (user && dbUser && isSecondAuthPassed) {
         if (loginBtn) loginBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'inline-block';
         if (userInfoDisplay) {
             userInfoDisplay.textContent = `${dbUser.name}님 환영합니다! (최고점: ${dbUser.score || 0})`;
             userInfoDisplay.style.display = 'inline-block';
         }
+        if (adminBtn && user.email === 'kdevelop1592@gmail.com') {
+            adminBtn.style.display = 'inline-block';
+        }
     } else {
         if (loginBtn) loginBtn.style.display = 'inline-block';
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (userInfoDisplay) userInfoDisplay.style.display = 'none';
+        if (adminBtn) adminBtn.style.display = 'none';
     }
 }
 
-async function checkUserStatus(user) {
+async function initiateAuthFlow(user) {
     const userRef = doc(db, 'users', user.uid);
     const docSnap = await getDoc(userRef);
 
@@ -54,16 +67,23 @@ async function checkUserStatus(user) {
         if (userData.status === 'blocked' || userData.status === 'deleted') {
             alert('이용이 정지되거나 퇴장당한 계정입니다.');
             await signOut(auth);
-            return null;
+            return;
         }
-        return userData;
+        pendingCreds = user;
+        pendingUserData = userData;
+        isNewUserFlow = false;
+
+        if (passwordModal) {
+            passwordModal.style.display = 'flex';
+            if (passwordInput) passwordInput.value = '';
+            if (passwordModalDesc) passwordModalDesc.textContent = '서비스 이용을 위해 설정하신 2차 비밀번호를 입력해주세요.';
+        }
     } else {
         // Show policy modal for new users
+        pendingCreds = user;
         if (policyModal) {
             policyModal.style.display = 'flex';
-            pendingCreds = user;
         }
-        return null;
     }
 }
 
@@ -71,11 +91,10 @@ if (loginBtn) {
     loginBtn.addEventListener('click', async () => {
         try {
             const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const userData = await checkUserStatus(user);
-            if (userData) {
-                currentUser = { ...user, dbData: userData };
-                updateUI(user, userData);
+            // initiateAuthFlow는 onAuthStateChanged에서 처리되므로 여기선 팝업만 실행해도 됨.
+            // 단, 이미 로그인된 상태에서 버튼을 강제로 누른 경우는 명시적 호출
+            if (!isSecondAuthPassed) {
+                await initiateAuthFlow(result.user);
             }
         } catch (error) {
             console.error("Login failed", error);
@@ -86,6 +105,7 @@ if (loginBtn) {
 
 if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
+        isSecondAuthPassed = false;
         await signOut(auth);
     });
 }
@@ -100,25 +120,13 @@ if (policyAgreeBtn) {
             return;
         }
 
-        try {
-            const newUser = {
-                uid: pendingCreds.uid,
-                email: pendingCreds.email,
-                name: pendingCreds.displayName,
-                score: 0,
-                status: 'active',
-                createdAt: new Date()
-            };
-
-            await setDoc(doc(db, 'users', pendingCreds.uid), newUser);
-            policyModal.style.display = 'none';
-            currentUser = { ...pendingCreds, dbData: newUser };
-            updateUI(pendingCreds, newUser);
-            pendingCreds = null;
-            alert('가입이 완료되었습니다!');
-        } catch (error) {
-            console.error('Error saving user data:', error);
-            alert('사용자 정보 저장 중 오류가 발생했습니다.');
+        // 약관 동의 통과 시 2차 비밀번호 설정 창으로 이동
+        policyModal.style.display = 'none';
+        isNewUserFlow = true;
+        if (passwordModal) {
+            passwordModal.style.display = 'flex';
+            if (passwordInput) passwordInput.value = '';
+            if (passwordModalDesc) passwordModalDesc.textContent = '사용하실 2차 비밀번호를 설정해주세요.';
         }
     });
 }
@@ -131,19 +139,79 @@ if (policyCancelBtn) {
     });
 }
 
+if (passwordSubmitBtn) {
+    passwordSubmitBtn.addEventListener('click', async () => {
+        const pwd = passwordInput.value;
+        if (!pwd) {
+            alert('비밀번호를 입력해주세요.');
+            return;
+        }
+
+        if (isNewUserFlow) {
+            // 신규 가입 저장 처리
+            try {
+                const newUser = {
+                    uid: pendingCreds.uid,
+                    email: pendingCreds.email,
+                    name: pendingCreds.displayName,
+                    score: 0,
+                    status: 'active',
+                    password: pwd, // 실 서비스에선 해싱 필요
+                    createdAt: new Date()
+                };
+
+                await setDoc(doc(db, 'users', pendingCreds.uid), newUser);
+                passwordModal.style.display = 'none';
+                isSecondAuthPassed = true;
+                currentUser = { ...pendingCreds, dbData: newUser };
+                updateUI(pendingCreds, newUser);
+                pendingCreds = null;
+                alert('가입 및 설정이 완료되었습니다!');
+            } catch (error) {
+                console.error('Error saving user data:', error);
+                alert('사용자 정보 저장 중 오류가 발생했습니다.');
+            }
+        } else {
+            // 기존 사용자 검증
+            if (pendingUserData.password === pwd) {
+                passwordModal.style.display = 'none';
+                isSecondAuthPassed = true;
+                currentUser = { ...pendingCreds, dbData: pendingUserData };
+                updateUI(pendingCreds, pendingUserData);
+                pendingCreds = null;
+                pendingUserData = null;
+            } else {
+                alert('비밀번호가 일치하지 않습니다.');
+            }
+        }
+    });
+}
+
+if (passwordCancelBtn) {
+    passwordCancelBtn.addEventListener('click', async () => {
+        passwordModal.style.display = 'none';
+        pendingCreds = null;
+        pendingUserData = null;
+        isSecondAuthPassed = false;
+        await signOut(auth);
+    });
+}
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        const userData = await checkUserStatus(user);
-        if (userData) {
-            currentUser = { ...user, dbData: userData };
-            updateUI(user, userData);
-        } else if (!pendingCreds) {
-            // Document doesn't exist and modal isn't showing, effectively logged out
-            currentUser = null;
-            updateUI(null, null);
+        if (!isSecondAuthPassed && !pendingCreds) {
+            // 페이지 새로고침 등으로 Firebase Session은 있으나 2차 인증을 안한 경우
+            await initiateAuthFlow(user);
+        } else if (isSecondAuthPassed) {
+            let uData = pendingUserData;
+            if (!uData && currentUser) uData = currentUser.dbData;
+            updateUI(user, uData);
         }
     } else {
         currentUser = null;
+        isSecondAuthPassed = false;
+        pendingCreds = null;
+        pendingUserData = null;
         updateUI(null, null);
     }
 });

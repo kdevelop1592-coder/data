@@ -12,7 +12,9 @@
     <header>
         <h1>데이터</h1>
         <div class="auth-container">
-            <span id="user-info" style="display: none; margin-right: 15px; font-weight: bold;"></span>
+            <span id="user-info" style="display: none; margin-right: 15px; font-weight: bold; color: white;"></span>
+            <a href="admin.html" id="admin-btn" class="auth-button admin-color"
+                style="display: none; text-decoration: none; margin-right: 10px;">관리자 대시보드</a>
             <button id="login-btn" class="auth-button">Google 로그인</button>
             <button id="logout-btn" class="auth-button" style="display: none;">로그아웃</button>
         </div>
@@ -83,6 +85,24 @@
             <div class="modal-buttons">
                 <button id="policy-cancel-btn" class="cancel-btn">취소</button>
                 <button id="policy-agree-btn" class="agree-btn">동의 및 가입</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2차 비밀번호 입력 모달 -->
+    <div id="password-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel">
+            <h2 id="password-modal-title">2차 비밀번호 입력</h2>
+            <div class="policy-text">
+                <p id="password-modal-desc">서비스 이용을 위해 설정하신 2차 비밀번호를 입력해주세요.</p>
+                <div style="margin-top: 15px;">
+                    <input type="password" id="secondary-password-input" class="blank-input" placeholder="비밀번호"
+                        style="width: 100%; border-radius: 4px; padding: 10px; border: 1px solid #ddd; background: rgba(255, 255, 255, 0.9);">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="password-cancel-btn" class="cancel-btn form-btn">취소</button>
+                <button id="password-submit-btn" class="agree-btn form-btn">확인</button>
             </div>
         </div>
     </div>
