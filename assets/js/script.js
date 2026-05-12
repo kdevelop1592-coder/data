@@ -1,4 +1,8 @@
-import questions from './question.js';
+import baseQuestions from './question.js';
+import aiQuestions from './question_ai.js';
+
+const questions = [...baseQuestions, ...aiQuestions];
+
 import { db, currentUser } from './auth.js';
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
