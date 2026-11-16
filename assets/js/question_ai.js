@@ -11,7 +11,8 @@ const aiQuestions = [
         "answer": "1956년 미국 다트머스 회의",
         "explanation": "인공지능이란 용어는 1956년 미국, 다트머스 회의에서 처음 등장하였으며 인간의 지능을 컴퓨팅 시스템으로 개발하려는 것이 목적이었습니다.",
         "number": "01",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -26,7 +27,8 @@ const aiQuestions = [
         "answer": "에이전트",
         "explanation": "외부 환경과 상호 작용하여 무언가를 할 수 있는 것을 에이전트라고 하며, 인공지능 기술이 포함되면 자율적으로 움직일 수 있습니다.",
         "number": "02",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -41,7 +43,8 @@ const aiQuestions = [
         "answer": "기계가 인간과 구별할 수 없는 지능을 가졌는지 확인하기 위해",
         "explanation": "튜링 테스트는 기계가 인간과 대화를 나누었을 때 인간이 기계임을 구별하지 못하면 인간과 같은 지능을 가졌다고 간주하는 실험입니다.",
         "number": "03",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -56,7 +59,8 @@ const aiQuestions = [
         "answer": "일반 소프트웨어는 사전에 프로그래밍이 된 규칙과 알고리즘에 따라 작동한다.",
         "explanation": "일반 소프트웨어는 정해진 규칙대로만 작동하는 반면, 인공지능 소프트웨어는 다양한 상황에서 자율적이고 유연하게 문제를 해결합니다.",
         "number": "04",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -71,7 +75,8 @@ const aiQuestions = [
         "answer": "생성형 인공지능",
         "explanation": "생성형 인공지능은 텍스트, 이미지, 음성 등 다양한 종류의 콘텐츠를 스스로 만들어 내거나 변형하는 기술입니다.",
         "number": "05",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -86,7 +91,8 @@ const aiQuestions = [
         "answer": "인간은 책이나 경험을 통해 학습하고, 인공지능은 데이터를 통해 학습한다.",
         "explanation": "인간은 일반적으로 책이나 경험을 통해 학습하며, 인공지능은 방대한 양의 데이터로 학습하여 규칙을 찾고 새로운 결과를 예측합니다.",
         "number": "06",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -101,7 +107,8 @@ const aiQuestions = [
         "answer": "학습 데이터",
         "explanation": "인공지능 모델이 학습하는 데 사용하는 데이터를 학습 데이터라고 하며 특정 작업을 수행하게 가르치는 핵심 역할을 합니다.",
         "number": "07",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -116,7 +123,8 @@ const aiQuestions = [
         "answer": "학습에 사용되는 데이터가 많을수록 인공지능의 판단 정확도를 높일 수 있다.",
         "explanation": "학습에 사용되는 데이터가 많을수록 인공지능은 더 정교한 규칙을 찾아내어 정확도를 높일 수 있습니다.",
         "number": "08",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -131,7 +139,8 @@ const aiQuestions = [
         "answer": "소음이 섞인 데이터, 사투리, 억양 등 다양한 특성의 데이터를 모두 학습시킨다.",
         "explanation": "인공지능은 다양한 특성(소음, 사투리 등)을 갖고 있는 데이터를 수집하여 학습에 사용할 때 실제 환경에서의 인식 정확도가 높아집니다.",
         "number": "09",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -146,7 +155,8 @@ const aiQuestions = [
         "answer": "목적에 맞게 잘 가공된 질 높은 데이터",
         "explanation": "자율주행 자동차가 사람, 자동차, 신호등을 구분하기 위해서는 목적에 맞게 잘 가공된 질 높은 데이터로 학습시켜야 합니다.",
         "number": "10",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -161,7 +171,8 @@ const aiQuestions = [
         "answer": "보이스 피싱 범죄 통화 분석",
         "explanation": "보이스 피싱 범죄 통화 분석은 이미지 데이터가 아닌 소리 데이터(음성의 특징)를 활용한 사례입니다.",
         "number": "11",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -176,7 +187,8 @@ const aiQuestions = [
         "answer": "이미지 분류 모델",
         "explanation": "로봇 지팡이는 카메라를 통해 입력된 사물을 식별해야 하므로 이미지 데이터를 활용하는 이미지 분류 모델이 필요합니다.",
         "number": "12",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -191,7 +203,8 @@ const aiQuestions = [
         "answer": "이미지 데이터",
         "explanation": "대량의 엑스레이 의료 영상은 이미지 데이터에 해당하며, 이를 분석하여 질병 진단에 도움을 줍니다.",
         "number": "13",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -206,7 +219,8 @@ const aiQuestions = [
         "answer": "숲에서 지저귀는 새소리를 구별하여 멸종 위기종 파악",
         "explanation": "숲에서 들리는 새소리의 특징을 분석해 동물의 생태계를 파악하고 멸종 위기종을 구별하는 것은 소리 데이터 활용의 좋은 예입니다.",
         "number": "14",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -221,7 +235,8 @@ const aiQuestions = [
         "answer": "보이스 피싱 범죄 음성 분석",
         "explanation": "보이스 피싱 범죄 음성 분석은 소리 데이터를 활용해 통화 중인 상대방 음성의 특징을 분석하고 범죄를 예방하는 기술입니다.",
         "number": "15",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -236,7 +251,8 @@ const aiQuestions = [
         "answer": "소리 데이터",
         "explanation": "환자의 숨소리와 기침은 청각적 특징이므로 소리 데이터를 분석하여 호흡기 질환 등의 증상을 분류합니다.",
         "number": "16",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -251,7 +267,8 @@ const aiQuestions = [
         "answer": "시끄러운 정글에서 코끼리 울음소리를 다른 소리와 구별",
         "explanation": "코끼리의 울음소리를 다른 소리와 구별하는 것은 소리 데이터 분류 모델을 활용한 사례입니다.",
         "number": "17",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -266,7 +283,8 @@ const aiQuestions = [
         "answer": "가짜 뉴스 판별",
         "explanation": "가짜 뉴스 판별은 주어진 텍스트 데이터의 의도를 분석하여 신뢰할 수 없는 정보를 식별하고 삭제하는 기술입니다.",
         "number": "18",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -281,7 +299,8 @@ const aiQuestions = [
         "answer": "사생활 침해",
         "explanation": "개인의 행동과 습관이 기록된 데이터를 무단으로 수집하면 민감한 개인 정보가 포함될 수 있어 사생활 침해 논란으로 이어집니다.",
         "number": "19",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -296,7 +315,8 @@ const aiQuestions = [
         "answer": "학습 데이터의 편향",
         "explanation": "한쪽으로 치우친(남성 중심) 지원서 데이터를 학습시켰기 때문에 여성 지원자를 차별하게 된 '학습 데이터의 편향' 문제입니다.",
         "number": "20",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -311,7 +331,8 @@ const aiQuestions = [
         "answer": "데이터 축적 과정에서 발생하는 편향",
         "explanation": "축적된 과거의 데이터에 당시의 인종 차별 같은 시대적 문화나 의식이 반영되어 있어, 이를 바탕으로 모델을 학습시키면 사회적 편향이 강화됩니다.",
         "number": "21",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -326,7 +347,8 @@ const aiQuestions = [
         "answer": "무조건적인 이윤 극대화",
         "explanation": "인공지능 윤리 기준 3대 기본 원칙은 '인간의 존엄성', '사회의 공공선', '기술의 합목적성'이며 기업의 무조건적인 이윤 극대화는 포함되지 않습니다.",
         "number": "22",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -341,7 +363,8 @@ const aiQuestions = [
         "answer": "기술의 불투명성 유지",
         "explanation": "10대 핵심 요건에는 인공지능 기술의 '투명성(설명 가능성)'이 포함되며, 이를 숨기는 불투명성은 지양해야 합니다.",
         "number": "23",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -356,7 +379,8 @@ const aiQuestions = [
         "answer": "개발 과정에서 발생한 알고리즘의 오류를 끝까지 은폐한다.",
         "explanation": "인공지능의 알고리즘을 인간이 조작하거나 은폐하면 왜곡 및 공정성 문제가 발생하므로 투명성을 유지해야 합니다.",
         "number": "24",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -371,7 +395,8 @@ const aiQuestions = [
         "answer": "지속 가능하도록 운영하며 인공지능의 영향력을 꾸준히 평가하고 개선한다.",
         "explanation": "관리·공급자는 서비스가 지속 가능할 수 있도록 운영하며, 인공지능이 미치는 영향력을 지속적으로 평가하고 개선해야 할 책임이 있습니다.",
         "number": "25",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -386,7 +411,8 @@ const aiQuestions = [
         "answer": "인공지능의 사용법을 정확하게 이해하고, 솔직한 사용 후기를 피드백으로 제공한다.",
         "explanation": "사용자는 인공지능을 올바르게 이해하고 사용해야 하며 워터마크 삭제나 음성 변조 악용 등은 철저히 피해야 합니다.",
         "number": "26",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -401,7 +427,8 @@ const aiQuestions = [
         "answer": "데이터를 수집할 때 최대한 다양성을 확보하고 편견을 배제한다.",
         "explanation": "데이터 수집 및 축적 과정에서의 편향을 예방하기 위해서는 최대한 편견을 배제하고 다양한 특성의 데이터를 확보하려는 노력이 필수적입니다.",
         "number": "27",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -416,7 +443,8 @@ const aiQuestions = [
         "answer": "프롬프트 엔지니어",
         "explanation": "프롬프트 엔지니어는 생성형 인공지능 등이 역량을 발휘할 수 있도록 적합한 지시어(프롬프트)를 설계하고 조정하는 일을 합니다.",
         "number": "28",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -431,7 +459,8 @@ const aiQuestions = [
         "answer": "기계적인 단순 반복 작업을 선호하는 태도",
         "explanation": "프롬프트 엔지니어는 단순 반복 작업이 아닌, 인공지능의 특성을 이해하고 창의적으로 명령어를 모색하고 수정하는 능력('인공지능 조련사')이 중요합니다.",
         "number": "29",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     },
     {
@@ -446,7 +475,8 @@ const aiQuestions = [
         "answer": "협업 지능",
         "explanation": "인간과 인공지능의 장점을 결합하여 더 나은 세상을 창조하고 문제를 해결하는 것을 '협업 지능'이라고 합니다.",
         "number": "30",
-        "chapter": "4. 인공지능",
+        "subject": "정보",
+        "chapter": "4단원 인공지능",
         "type": "multiple-choice"
     }
 ];

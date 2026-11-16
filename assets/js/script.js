@@ -36,7 +36,25 @@ let isAnswerSubmitted = false;
 let isMultipleChoiceAnswered = false;
 let isEssayAnswerShown = false;
 
+// 과목별 기본 단원 목록 정의
+const SUBJECT_CHAPTERS = {
+    '정보': [
+        '1단원 컴퓨팅 시스템',
+        '2단원 데이터',
+        '3단원 알고리즘과 프로그래밍',
+        '4단원 인공지능',
+        '5단원 디지털 문화'
+    ],
+    '앱과 코딩': [
+        '1단원 알고리즘',
+        '2단원 프로그래밍',
+        '3단원 앱 프로그래밍',
+        '4단원 앱과 피지컬 컴퓨팅'
+    ]
+};
+
 document.addEventListener('DOMContentLoaded', function () {
+    const selectionSubjectFilter = document.getElementById('selection-subject-filter');
     const selectionChapterFilter = document.getElementById('selection-chapter-filter');
     const selectionTypeFilter = document.getElementById('selection-type-filter');
 
@@ -49,6 +67,9 @@ document.addEventListener('DOMContentLoaded', function () {
     incorrectQuestions = [];
     isReviewMode = false;
     quizStarted = false;
+
+    // 과목 필터 동적 생성
+    populateSubjectFilter(selectionSubjectFilter);
 
     // 선택 화면 표시, 문제 화면 숨김
     showSelectionScreen();
@@ -74,7 +95,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error("Failed to delete session", e);
                 }
             }
-            startQuiz(null, document.getElementById('selection-type-filter').value);
+            const subjVal = selectionSubjectFilter ? selectionSubjectFilter.value : '선택하세요';
+            const chapVal = selectionChapterFilter ? selectionChapterFilter.value : '전체';
+            startQuiz(subjVal, chapVal, selectionTypeFilter.value);
         });
     }
 
@@ -144,8 +167,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        const selectedSubject = selectionSubjectFilter ? selectionSubjectFilter.value : '선택하세요';
         const selectedChapter = selectionChapterFilter ? selectionChapterFilter.value : '전체';
         const selectedType = selectionTypeFilter.value;
+
+        if (selectedSubject === '선택하세요') {
+            showMessage('과목을 선택해주세요.', 'warning');
+            return;
+        }
 
         if (selectedType === '선택하세요') {
             showMessage('문제 유형을 선택해주세요.', 'warning');
@@ -169,39 +198,101 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error checking session:', e);
         }
 
-        startQuiz(selectedChapter, selectedType);
+        startQuiz(selectedSubject, selectedChapter, selectedType);
     });
+
+    // 과목 변경 이벤트 리스너
+    if (selectionSubjectFilter) {
+        selectionSubjectFilter.addEventListener('change', () => {
+            populateChapterFilter(selectionChapterFilter, selectionSubjectFilter.value);
+            updateMessageForSelection();
+        });
+    }
 
     // 필터 변경 이벤트 리스너
     if (selectionChapterFilter) {
         selectionChapterFilter.addEventListener('change', () => {
-            updateMessageForSelection(selectionChapterFilter.value, selectionTypeFilter.value);
+            updateMessageForSelection();
         });
     }
     if (selectionTypeFilter) {
         selectionTypeFilter.addEventListener('change', () => {
-            const chapterVal = selectionChapterFilter ? selectionChapterFilter.value : '전체';
-            updateMessageForSelection(chapterVal, selectionTypeFilter.value);
+            updateMessageForSelection();
         });
     }
 
     // 초기 메시지 표시
-    const initialChapter = selectionChapterFilter ? selectionChapterFilter.value : '전체';
-    updateMessageForSelection(initialChapter, selectionTypeFilter ? selectionTypeFilter.value : '선택하세요');
+    updateMessageForSelection();
 });
 
+// 과목 필터 옵션 동적 생성
+function populateSubjectFilter(subjectSelect) {
+    if (!subjectSelect) return;
+
+    const subjectsFromData = questions.map(q => q.subject).filter(Boolean);
+    const subjects = [...new Set([...Object.keys(SUBJECT_CHAPTERS), ...subjectsFromData])];
+    subjectSelect.innerHTML = '<option value="선택하세요">과목을 선택하세요</option>';
+
+    subjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject;
+        option.textContent = subject;
+        subjectSelect.appendChild(option);
+    });
+}
+
+// 선택한 과목에 따른 세부 단원 필터 옵션 동적 생성
+function populateChapterFilter(chapterSelect, selectedSubject) {
+    if (!chapterSelect) return;
+
+    if (selectedSubject === '선택하세요') {
+        chapterSelect.innerHTML = '<option value="전체">과목을 먼저 선택하세요</option>';
+        chapterSelect.disabled = true;
+        return;
+    }
+
+    chapterSelect.disabled = false;
+    chapterSelect.innerHTML = '<option value="전체">전체 단원</option>';
+
+    const relevantQuestions = questions.filter(q => q.subject === selectedSubject);
+    const presetChapters = SUBJECT_CHAPTERS[selectedSubject] || [];
+    const dataChapters = relevantQuestions.map(q => q.chapter).filter(Boolean);
+    const chapters = [...new Set([...presetChapters, ...dataChapters])];
+
+    chapters.forEach(chapter => {
+        const option = document.createElement('option');
+        option.value = chapter;
+        option.textContent = chapter;
+        chapterSelect.appendChild(option);
+    });
+}
+
 // 선택에 따른 메시지 업데이트 함수
-function updateMessageForSelection(selectedChapter, selectedType) {
+function updateMessageForSelection() {
+    const selectionSubjectFilter = document.getElementById('selection-subject-filter');
+    const selectionChapterFilter = document.getElementById('selection-chapter-filter');
+    const selectionTypeFilter = document.getElementById('selection-type-filter');
+
+    const selectedSubject = selectionSubjectFilter ? selectionSubjectFilter.value : '선택하세요';
+    const selectedChapter = selectionChapterFilter ? selectionChapterFilter.value : '전체';
+    const selectedType = selectionTypeFilter ? selectionTypeFilter.value : '선택하세요';
+
+    if (selectedSubject === '선택하세요') {
+        showMessage('과목을 선택해주세요.', 'info');
+        return;
+    }
+
     if (selectedType === '선택하세요') {
         showMessage('문제 유형을 선택해주세요.', 'info');
-    } else {
-        let filtered = [...questions];
-        if (selectedChapter && selectedChapter !== '전체') {
-            filtered = filtered.filter(q => q.chapter === selectedChapter || q.chapter.includes(selectedChapter.split('.')[1].trim()));
-        }
-        filtered = filtered.filter(q => q.type === selectedType);
-        showMessage(`선택된 조건에 맞는 문제: ${filtered.length}개`, 'info');
+        return;
     }
+
+    let filtered = [...questions].filter(q => q.subject === selectedSubject);
+    if (selectedChapter && selectedChapter !== '전체') {
+        filtered = filtered.filter(q => q.chapter === selectedChapter);
+    }
+    filtered = filtered.filter(q => q.type === selectedType);
+    showMessage(`선택된 조건에 맞는 문제: ${filtered.length}개`, 'info');
 }
 
 // 선택 화면 표시 함수
@@ -211,15 +302,18 @@ function showSelectionScreen() {
 }
 
 // 필터링 함수 수정
-function filterQuestions(selectedChapter, selectedType) {
+function filterQuestions(selectedSubject, selectedChapter, selectedType) {
     // 모든 문제를 가져옴
     let filtered = [...questions];
 
+    // 과목 필터링
+    if (selectedSubject && selectedSubject !== '선택하세요') {
+        filtered = filtered.filter(q => q.subject === selectedSubject);
+    }
+
     // 챕터 필터링 (selectedChapter가 '전체'가 아니면 필터링)
     if (selectedChapter && selectedChapter !== '전체') {
-        // q.chapter가 '데이터' 와 같이 저장되어 있을 수 있으므로 포함 여부 검사
-        const chapterName = selectedChapter.split('.')[1] ? selectedChapter.split('.')[1].trim() : selectedChapter;
-        filtered = filtered.filter(q => q.chapter === selectedChapter || q.chapter.includes(chapterName));
+        filtered = filtered.filter(q => q.chapter === selectedChapter);
     }
 
     // 유형 필터링
@@ -244,9 +338,9 @@ function filterQuestions(selectedChapter, selectedType) {
 }
 
 // startQuiz 함수 (새로 시작)
-function startQuiz(chapter, type) {
+function startQuiz(subject, chapter, type) {
     // 필터링 실행
-    if (!filterQuestions(chapter, type)) {
+    if (!filterQuestions(subject, chapter, type)) {
         return;
     }
 
@@ -335,7 +429,8 @@ function displayQuestion() {
     // 문제 번호와 챕터 표시
     const questionMeta = document.createElement('div');
     questionMeta.className = 'question-meta';
-    questionMeta.innerHTML = `<span class="chapter">${currentQuestion.chapter}</span> <span class="number">문제 ${currentQuestion.number}</span>`;
+    const subjectLabel = currentQuestion.subject ? `[${currentQuestion.subject}] ` : '';
+    questionMeta.innerHTML = `<span class="chapter">${subjectLabel}${currentQuestion.chapter}</span> <span class="number">문제 ${currentQuestion.number}</span>`;
     questionContainer.appendChild(questionMeta);
 
     // 문제 텍스트 표시
@@ -531,8 +626,13 @@ function displayResult(isCorrect, userAnswer, correctAnswer) {
         resultText.innerHTML = `<p>오답입니다.</p><p>제출한 답: ${userAnswer}</p><p>정답: ${correctAnswerText}</p>`;
 
         // 오답 문제 저장 (중복 방지)
-        if (!isReviewMode && !incorrectQuestions.some(q => q.number === filteredQuestions[currentQuestionIndex].number)) {
-            incorrectQuestions.push(filteredQuestions[currentQuestionIndex]);
+        const currentQ = filteredQuestions[currentQuestionIndex];
+        if (!isReviewMode && !incorrectQuestions.some(q =>
+            q.subject === currentQ.subject &&
+            q.chapter === currentQ.chapter &&
+            q.number === currentQ.number
+        )) {
+            incorrectQuestions.push(currentQ);
         }
     }
 
@@ -799,13 +899,17 @@ async function resetQuiz(skipSessionDelete = false) {
     showSelectionScreen();
 
     // 필터 초기화
+    const selectionSubjectFilter = document.getElementById('selection-subject-filter');
     const selectionChapterFilter = document.getElementById('selection-chapter-filter');
     const selectionTypeFilter = document.getElementById('selection-type-filter');
+    if (selectionSubjectFilter) {
+        selectionSubjectFilter.value = '선택하세요';
+    }
     if (selectionChapterFilter) {
-        selectionChapterFilter.value = '전체';
+        populateChapterFilter(selectionChapterFilter, '선택하세요');
     }
     if (selectionTypeFilter) {
-        selectionTypeFilter.value = '선택하세요';
-        updateMessageForSelection(selectionChapterFilter ? selectionChapterFilter.value : '전체', '선택하세요');
+        selectionTypeFilter.value = 'multiple-choice';
     }
+    updateMessageForSelection();
 }

@@ -3,6 +3,8 @@
     "public": ".",
     "ignore": [
       "firebase.json",
+      "deploy.py",
+      "temp/**",
       "**/.*",
       "**/node_modules/**"
     ]
