@@ -162,10 +162,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 시작 버튼 이벤트 리스너 추가
     startButton.addEventListener('click', async () => {
-        if (!currentUser) {
-            showMessage('Google 로그인을 먼저 진행해주세요.', 'warning');
-            return;
-        }
+        // if (!currentUser) {
+        //     showMessage('Google 로그인을 먼저 진행해주세요.', 'warning');
+        //     return;
+        // }
 
         const selectedSubject = selectionSubjectFilter ? selectionSubjectFilter.value : '선택하세요';
         const selectedChapter = selectionChapterFilter ? selectionChapterFilter.value : '전체';
